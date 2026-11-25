@@ -1,0 +1,520 @@
+/* ============================================================
+   sobre.css — mobile first.
+   Celular: el sobre ocupa toda la pantalla.
+   Escritorio: columna centrada de 468 px (como la portada) con espacio a los lados.
+   ============================================================ */
+:root {
+  --warm-brown: #6e4f49;
+  --dusty-rose: #c99a96;
+  --mauve-taupe: #a98583;
+  --deep-wine: #401e1d;
+  --soft-ivory: #f3e7e2;
+  --light: #fff8f4;
+  --col: 468px;
+  --env: #c08b87;
+
+  --font-text: "josefin-sans", "Segoe UI", sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: var(--soft-ivory);
+  color: var(--warm-brown);
+  font-family: var(--font-text);
+  -webkit-tap-highlight-color: transparent;
+}
+body.is-locked { overflow: hidden; }
+img { display: block; }
+
+/* ======================= SOBRE ======================= */
+.stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  background: var(--soft-ivory);
+}
+.column {
+  position: relative;
+  width: min(100%, var(--col));
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  container-type: size;
+  background: var(--env);
+  transition: opacity 0.8s ease;
+}
+.is-loading .column { opacity: 0; }
+
+/* La escena mantiene la proporción de las imágenes (9:20) y cubre la columna */
+.zoom {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+}
+.scene {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  width: max(100cqw, calc(100cqh * 941 / 1672));
+  aspect-ratio: 941 / 1672;
+  transform: translate(-50%, -50%);
+  perspective: 820px;
+}
+/* Dos mitades del sobre */
+.half {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+.half__img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.half--left .half__img  { clip-path: inset(0 50% 0 0); }
+.half--right .half__img { clip-path: inset(0 0 0 50%); }
+
+/* Sello: en el centro del sobre (472, 848 del lienzo 941×1672); viaja con la mitad izquierda */
+.seal {
+  position: absolute;
+  left: 50.16%;
+  top: 50.72%;
+  width: 32%;
+  aspect-ratio: 640 / 610;
+  transform: translate(-50%, -50%);
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 50%;
+  cursor: pointer;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.seal img { width: 100%; height: 100%; pointer-events: none; filter: drop-shadow(0 6px 8px rgba(64, 30, 29, 0.35)) drop-shadow(0 1px 2px rgba(64, 30, 29, 0.3)); }
+.seal:focus-visible { outline: 3px solid var(--soft-ivory); outline-offset: 2px; }
+
+.hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(5.5rem + env(safe-area-inset-bottom));
+  text-align: center;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  color: var(--soft-ivory);
+  text-shadow: 0 1px 4px rgba(64, 30, 29, 0.45);
+  animation: blink 1.8s ease-in-out infinite;
+  transition: opacity 0.4s ease;
+}
+/* Titila suave para que se note */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+
+/* ======================= ABRIR: LAS MITADES SE DESLIZAN ======================= */
+/* El mapa se ve solo por la abertura del sobre; los lados (en escritorio)
+   se desvanecen cuando el sobre ya terminó de abrirse */
+.stage { z-index: 30; }
+.column { transition: background-color 0.5s ease; }
+.is-sliding .column { background-color: transparent; }
+.is-sliding .stage { background-color: transparent; }  /* detrás del sobre: el mapa */
+/* El mapa debajo de la columna no se asoma por los lados mientras abre */
+.stage::before,
+.stage::after {
+  content: "";
+  flex: 1;
+  background: var(--soft-ivory);
+  transition: opacity 1s ease 1.5s;
+}
+.stage::before { order: -1; }
+.is-sliding .stage::before,
+.is-sliding .stage::after { opacity: 0; }
+
+.is-sliding .half {
+  transition: transform 1.5s cubic-bezier(0.65, 0, 0.35, 1) 0.2s, opacity 0.6s ease 1.2s;
+  filter: drop-shadow(0 0 18px rgba(64, 30, 29, 0.35));
+}
+.is-sliding .half--left  { transform: translateX(-62%); opacity: 0; }
+.is-sliding .half--right { transform: translateX(62%);  opacity: 0; }
+
+.is-sliding .seal { pointer-events: none; }
+.is-sliding .hint { animation: none; opacity: 0; }
+
+/* ======================= MAPA Y VUELO ======================= */
+.map {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  opacity: 0;
+  visibility: hidden;
+  background: var(--map-bg, #ebd4d2);
+  transition: opacity 0.7s ease, visibility 0.7s;
+}
+.map__svg { width: 100%; height: 100%; display: block; }
+.is-map .map { opacity: 1; visibility: visible; transition: none; }
+
+.trail {
+  stroke: var(--fly, #6e4f49);
+  stroke-width: 3.4;
+  stroke-dasharray: 10 9;
+  stroke-linecap: round;
+}
+.plane { fill: var(--fly, #6e4f49); opacity: 0; }
+.is-flying .plane { opacity: 1; transition: opacity 0.4s ease; }
+.plane.is-landed { opacity: 0; transition: opacity 0.7s ease 0.5s; }
+
+.landing { opacity: 0; }
+.landing__dot { fill: var(--fly, #6e4f49); }
+.landing__ring { fill: none; stroke: var(--fly, #6e4f49); stroke-width: 2; transform-box: fill-box; transform-origin: center; }
+.landing.is-on { opacity: 1; transition: opacity 0.4s ease; }
+.landing.is-on .landing__ring { animation: ring 1.4s ease-out infinite; }
+@keyframes ring {
+  from { transform: scale(1); opacity: 0.9; }
+  to   { transform: scale(3.2); opacity: 0; }
+}
+
+/* Coordenadas junto al punto de aterrizaje (se escriben letra por letra) */
+.coords {
+  font-family: var(--font-text);
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: 0.12em;
+  fill: var(--fly, #6e4f49);
+  stroke: var(--map-bg, #ebd4d2);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+
+/* Título y subtítulo al aterrizar */
+.reveal {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  padding: calc(2.6rem + env(safe-area-inset-top)) 1.5rem 4.5rem;
+  text-align: center;
+  pointer-events: none;
+  background: linear-gradient(to bottom, var(--map-bg, #ebd4d2) 0%, var(--map-bg, #ebd4d2) 45%, rgba(235, 212, 210, 0) 100%);
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.is-on { opacity: 1; transform: none; }
+.reveal__title {
+  font-family: "modish", "Brush Script MT", cursive;
+  font-size: clamp(2.1rem, 9vw, 3rem);
+  line-height: 1.05;
+  color: var(--deep-wine);
+}
+.reveal__sub {
+  margin-top: 0.6rem;
+  font-family: var(--font-text);
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--warm-brown);
+  opacity: 0;
+  transition: opacity 0.8s ease 0.5s;
+}
+.reveal.is-on .reveal__sub { opacity: 1; }
+
+/* En escritorio el mapa se ve completo: trazo y avión un poco más grandes */
+@media (min-width: 700px) {
+  .trail { stroke-width: 3; }
+}
+
+/* ======================= PASE DE ABORDAR ======================= */
+.next {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  overflow-y: auto;
+  /* El mapa del vuelo queda de fondo, con un velo rosado y un poco de desenfoque */
+  background: radial-gradient(ellipse at 50% 50%, rgba(243, 231, 226, 0.25) 0%, rgba(235, 212, 210, 0.55) 70%, rgba(222, 195, 191, 0.7) 100%);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.9s ease, visibility 0.9s;
+}
+.is-done .next { opacity: 1; visibility: visible; }
+/* El título del aterrizaje se retira cuando llega el pase */
+.is-done .reveal { opacity: 0; transition: opacity 0.6s ease; }
+
+:root {
+  --pass-rose: #a8706c;     /* rosa profundo: franja y botones */
+  --pass-paper: #f2e2de;    /* fondo de la zona 2 */
+  --pass-label: #8f6a67;
+}
+
+/* Escritorio: horizontal (banda | cuerpo | talón) */
+.pass {
+  position: relative;
+  width: min(100%, 900px);
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) 30%;
+  min-height: 330px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--pass-paper);
+  color: var(--warm-brown);
+  box-shadow: 0 16px 36px rgba(64, 30, 29, 0.22), 0 2px 6px rgba(64, 30, 29, 0.12);
+  transform: translateY(24px) scale(0.98);
+  transition: transform 1s cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+.is-done .pass { transform: none; }
+
+/* Zona 1 */
+.pass__band {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--pass-rose);
+  color: #fffaf8;
+}
+.pass__band span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--font-text);
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Zona 2: papel de acuarela + mapa tenue + sello K&J */
+.pass__body {
+  position: relative;
+  padding: 1.6rem 1.9rem 1.7rem;
+  overflow: hidden;
+  border-right: 2px dashed #c99a96;
+}
+.pass__body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("assets/paper_texture.webp") center / 360px auto;
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.pass__body::after {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  background: url("assets/mapa.webp") 40% 45% / 115% auto no-repeat;
+  mix-blend-mode: multiply;
+  opacity: 0.13;
+  pointer-events: none;
+}
+.pass__body > * { position: relative; z-index: 1; }
+.pass__seal {
+  position: absolute !important;
+  top: 0.7rem;
+  right: 1.6rem;
+  width: 150px;
+  height: auto;
+  transform: rotate(-12deg);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.pass__title {
+  margin: 0 0 1rem;
+  font-family: "alegreya", Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(1.7rem, 3.4vw, 2.3rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--deep-wine);
+}
+.pass__fields { display: flex; flex-wrap: wrap; gap: 0.6rem 2.2rem; margin: 0; }
+.pass__fields dt,
+.pass__label {
+  margin: 0;
+  font-family: var(--font-text);
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--pass-label);
+}
+.pass__fields dd { margin: 0.15rem 0 0; font-size: 1rem; }
+
+.pass__legs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.4rem;
+  margin-top: 1.2rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(201, 154, 150, 0.55);
+}
+.pass__leg p { margin: 0; }
+.pass__time { margin-top: 0.2rem !important; font-size: 1.3rem; color: var(--deep-wine); }
+.pass__place { margin-top: 0.15rem !important; font-size: 1rem; }
+.pass__address { margin: 0.15rem 0 0.75rem !important; font-size: 0.85rem; }
+.pass__btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 1.1rem;
+  border-radius: 999px;
+  background: var(--pass-rose);
+  color: #fffaf8;
+  font-family: var(--font-text);
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.pass__btn:focus-visible { outline: 3px solid var(--deep-wine); outline-offset: 3px; }
+
+/* Zona 3: ilustración con zoom hacia la pareja + nombres */
+.pass__stub {
+  position: relative;
+  margin: 0;
+  min-height: 330px;
+  background-color: #efd8d4;
+  background-repeat: no-repeat;
+  background-size: 160% auto;
+  background-position: 58% 90%;
+}
+.pass__names {
+  position: absolute;
+  top: 1.1rem;
+  left: 0.5rem;
+  right: 0.5rem;
+  text-align: center;
+  font-family: "modish", "Brush Script MT", cursive;
+  font-size: clamp(2rem, 3.6vw, 2.6rem);
+  line-height: 1;
+  color: var(--deep-wine);
+  text-shadow: 0 1px 8px rgba(255, 240, 236, 0.9);
+}
+.pass__amp { display: block; font-size: 0.7em; margin: 0.1em 0; color: var(--pass-rose); }
+
+/* Muescas de la línea de corte */
+.pass__notch {
+  position: absolute;
+  z-index: 2;
+  right: calc(30% - 14px);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e6cdca;  /* tono del velo sobre el mapa */
+  box-shadow: inset 0 2px 3px rgba(64, 30, 29, 0.15);
+}
+.pass__notch--a { top: -14px; }
+.pass__notch--b { bottom: -14px; }
+
+/* ---------- Celular en vertical: el pase horizontal, girado 90° ----------
+   La persona voltea el celular para leerlo, como un pase de abordar real. */
+.rotate-hint { display: none; }
+
+@media (max-width: 699px) and (orientation: portrait) {
+  .next { padding: 0; overflow: hidden; }
+  .pass {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(calc(100dvh - 2rem), 900px);
+    height: calc(100vw - 2rem);
+    min-height: 0;
+    grid-template-columns: 50px minmax(0, 1fr) 30%;
+    transform: translate(-50%, -50%) rotate(90deg) translateY(16px);
+  }
+  .is-done .pass { transform: translate(-50%, -50%) rotate(90deg); }
+  .pass__body { padding: 1.1rem 1.4rem 1.2rem; }
+  .pass__stub { min-height: 0; }
+  .pass__seal { width: 120px; top: 0.4rem; right: 1rem; }
+
+  /* Aviso "Gira tu celular" (aparece y se va solo) */
+  .rotate-hint {
+    display: flex;
+    position: absolute;
+    z-index: 5;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1.2rem;
+    border-radius: 999px;
+    background: rgba(64, 30, 29, 0.82);
+    color: #fffaf8;
+    font-family: var(--font-text);
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .is-done .rotate-hint { animation: hint 3.2s ease 0.9s forwards; }
+  .rotate-hint svg { width: 22px; height: 22px; animation: turn 1.6s ease-in-out 1.2s 2; }
+}
+/* Celulares pequeños (≤ 380 px de ancho): todo un poco más compacto */
+@media (max-width: 380px) and (orientation: portrait) {
+  .pass { grid-template-columns: 42px minmax(0, 1fr) 28%; }
+  .pass__body { padding: 0.75rem 1rem 0.8rem; }
+  .pass__title { font-size: 1.3rem; margin-bottom: 0.5rem; }
+  .pass__fields { gap: 0.3rem 1.2rem; }
+  .pass__fields dt, .pass__label { font-size: 0.6rem; }
+  .pass__fields dd { font-size: 0.82rem; }
+  .pass__legs { gap: 1rem; margin-top: 0.6rem; padding-top: 0.55rem; }
+  .pass__time { font-size: 1.05rem; }
+  .pass__place { font-size: 0.82rem; }
+  .pass__address { font-size: 0.7rem; margin-bottom: 0.45rem !important; }
+  .pass__btn { min-height: 30px; padding: 0 0.8rem; font-size: 0.62rem; }
+  .pass__seal { width: 84px; top: 0.3rem; right: 0.6rem; }
+  .pass__names { font-size: 1.7rem; }
+  .pass__band span { font-size: 0.66rem; }
+  .pass__notch { right: calc(28% - 14px); }
+}
+@keyframes hint { 0% { opacity: 0; } 15%, 80% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes turn { 0%, 20% { transform: rotate(0); } 60%, 100% { transform: rotate(90deg); } }
+
+/* ---------- Celular en horizontal: el pase de frente, ajustado a la altura ---------- */
+@media (max-height: 520px) and (orientation: landscape) {
+  .next { padding: 0.75rem; }
+  .pass { width: min(100%, 900px); height: calc(100dvh - 1.5rem); min-height: 0; }
+  .pass__body { padding: 1rem 1.4rem; }
+  .pass__stub { min-height: 0; }
+  .pass__seal { width: 120px; }
+}
+
+/* ======================= BOTÓN DE SONIDO ======================= */
+.sound-toggle {
+  position: fixed;
+  z-index: 60;
+  right: calc(1rem + env(safe-area-inset-right));
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(168, 112, 108, 0.9);
+  color: #fffaf8;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(64, 30, 29, 0.25);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s;
+}
+.sound-toggle.is-visible { opacity: 1; visibility: visible; }
+.sound-toggle.is-muted { background: rgba(110, 79, 73, 0.75); }
+.sound-toggle:focus-visible { outline: 3px solid var(--deep-wine); outline-offset: 3px; }
+
+/* ======================= Menos movimiento ======================= */
+@media (prefers-reduced-motion: reduce) {
+  .hint { animation: none; }
+}
+

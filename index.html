@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#a98583">
+  <title>Karen &amp; Juan · 18.12.2026</title>
+  <link rel="icon" type="image/png" href="assets/faviconkj.png">
+  <link rel="apple-touch-icon" href="assets/faviconkj.png">
+
+  <!-- Mismas fuentes que la invitación principal (Adobe Fonts) -->
+  <link rel="stylesheet" href="https://use.typekit.net/hej5yfk.css">
+  <link rel="stylesheet" href="sobre.css">
+</head>
+<body class="is-locked is-loading">
+
+  <!-- ============ SOBRE ============ -->
+  <div class="stage" id="stage">
+    <div class="column">
+      <div class="zoom" id="zoom">
+        <div class="scene">
+          <!-- El sobre se parte en dos: la mitad izquierda (con el sello) va a la izquierda
+               y la derecha a la derecha, como puertas corredizas -->
+          <div class="half half--right">
+            <img class="half__img" data-img="closed" alt="">
+          </div>
+          <div class="half half--left">
+            <img class="half__img" data-img="closed" alt="">
+            <button class="seal" id="sealBtn" type="button">
+              <img data-img="seal" alt="">
+            </button>
+          </div>
+        </div>
+      </div>
+      <p class="hint" id="hint"></p>
+    </div>
+  </div>
+
+  <!-- ============ MAPA Y VUELO ============ -->
+  <div class="map" id="map" aria-hidden="true">
+    <svg class="map__svg" id="mapSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1536 1024" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <mask id="trailMask" maskUnits="userSpaceOnUse" x="0" y="0" width="1536" height="1200">
+          <path id="trailReveal" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round"/>
+        </mask>
+      </defs>
+      <image id="mapImg" width="1536" height="1024" preserveAspectRatio="none"/>
+      <path class="trail" id="trail" fill="none" mask="url(#trailMask)"/>
+      <g class="landing" id="landing">
+        <circle class="landing__ring" r="9"/>
+        <circle class="landing__dot" r="5"/>
+      </g>
+      <text class="coords" id="coords"></text>
+      <g id="plane" class="plane">
+        <!-- Avión visto desde arriba, con la nariz hacia arriba (dibujo propio) -->
+        <path d="M0 -19 C2.6 -19 3.4 -15 3.4 -11 L3.4 -4 L18 4.5 C19.2 5.2 19.2 7.6 18 7.6 L3.4 3.4 L3 11 L8.5 15 C9.3 15.6 9.2 17.4 8.3 17.4 L1.6 15.6 L0 18 L-1.6 15.6 L-8.3 17.4 C-9.2 17.4 -9.3 15.6 -8.5 15 L-3 11 L-3.4 3.4 L-18 7.6 C-19.2 7.6 -19.2 5.2 -18 4.5 L-3.4 -4 L-3.4 -11 C-3.4 -15 -2.6 -19 0 -19 Z"/>
+      </g>
+    </svg>
+    <div class="reveal" id="reveal">
+      <p class="reveal__title" id="revealTitle"></p>
+      <p class="reveal__sub" id="revealSub"></p>
+    </div>
+  </div>
+
+  <!-- ============ PASE DE ABORDAR ============ -->
+  <main class="next" id="next" aria-hidden="true">
+    <p class="rotate-hint" id="rotateHint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/>
+      </svg>
+      <span id="rotateText"></span>
+    </p>
+    <article class="pass" id="pass">
+      <!-- Zona 1: aerolínea y vuelo -->
+      <header class="pass__band"><span id="passBand"></span></header>
+
+      <!-- Zona 2: datos del vuelo y escalas -->
+      <section class="pass__body">
+        <img class="pass__seal" id="passSeal" alt="" aria-hidden="true">
+        <h1 class="pass__title" id="passTitle"></h1>
+        <dl class="pass__fields" id="passFields"></dl>
+        <div class="pass__legs" id="passLegs"></div>
+      </section>
+
+      <!-- Zona 3: talón con la ilustración -->
+      <figure class="pass__stub" id="passStub">
+        <figcaption class="pass__names" id="passNames"></figcaption>
+      </figure>
+
+      <i class="pass__notch pass__notch--a" aria-hidden="true"></i>
+      <i class="pass__notch pass__notch--b" aria-hidden="true"></i>
+    </article>
+  </main>
+
+  <!-- Botón para silenciar (aparece al abrir el sobre) -->
+  <button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" aria-label="Silenciar">♫</button>
+
+  <script src="config.js"></script>
+  <script src="sonidos.js"></script>
+  <script src="sobre.js"></script>
+</body>
+</html>
